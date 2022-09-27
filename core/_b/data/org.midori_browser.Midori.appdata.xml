@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>org.midori_browser.Midori</id>
+  <launchable type="desktop-id">org.midori_browser.Midori.desktop</launchable>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LGPL-2.1-or-later</project_license>
+  <name>Midori Web Browser</name>
+  <name xml:lang="af">Midori Web Blaaier</name>
+  <name xml:lang="ar">ميدورى مُتصفح الويب</name>
+  <name xml:lang="be">Вэб-браўзер Midori</name>
+  <name xml:lang="bg">Уеб браузър Midori</name>
+  <name xml:lang="bn">মিডোরি ওয়েব ব্রাউজার</name>
+  <name xml:lang="bs">Midori internet pregledač</name>
+  <name xml:lang="ca">Navegador web Midori</name>
+  <name xml:lang="ckb">وێبگه‌ڕی میدۆری</name>
+  <name xml:lang="cs">Internetový prohlížeč Midori</name>
+  <name xml:lang="cy">Midori Porwr Gwe</name>
+  <name xml:lang="da">Midori-webbrowser</name>
+  <name xml:lang="de">Midori Webbrowser</name>
+  <name xml:lang="el">Περιηγητής Ιστού Midori</name>
+  <name xml:lang="en_AU">Midori Web Browser</name>
+  <name xml:lang="en_CA">Midori Web Browser</name>
+  <name xml:lang="en_GB">Midori Web Browser</name>
+  <name xml:lang="eo">Retumilo Midori</name>
+  <name xml:lang="es">Navegador web Midori</name>
+  <name xml:lang="et">Midori veebibrauser</name>
+  <name xml:lang="eu">Web-arakatzaile mugikorra</name>
+  <name xml:lang="fa">مرورگر وب میدوری</name>
+  <name xml:lang="fi">Midori-verkkoselain</name>
+  <name xml:lang="fr">Navigateur Web Midori</name>
+  <name xml:lang="gd">Brabhsair-lìn Midori</name>
+  <name xml:lang="gl">Navegador web Midori</name>
+  <name xml:lang="he">דפדפן האינטרנט  Midori</name>
+  <name xml:lang="hi">मिडोरी वेब ब्राउज़र</name>
+  <name xml:lang="hr">Midori web preglednik</name>
+  <name xml:lang="hu">Midori webböngésző</name>
+  <name xml:lang="ia">Le Navigator Web Midori</name>
+  <name xml:lang="id">Peramban Web Midori</name>
+  <name xml:lang="it">Browser web Midori</name>
+  <name xml:lang="ja">Midori ウェブブラウザー</name>
+  <name xml:lang="kk">Midori веб браузері</name>
+  <name xml:lang="km">កម្មវិធី​អ៊ីនធឺណិត Midori</name>
+  <name xml:lang="ko">미도리 웹 브라우저</name>
+  <name xml:lang="ku">Midori Web Gerok</name>
+  <name xml:lang="ky">Midori интернет-серепчиси</name>
+  <name xml:lang="lb">Midori Web Browser</name>
+  <name xml:lang="lt">Interneto naršyklė Midori</name>
+  <name xml:lang="lv">Midori tīmekļa pārlūks</name>
+  <name xml:lang="ml">മിഡോരി വെബ് ബ്രൗസര്‍</name>
+  <name xml:lang="ms">Pelayar Web Midori</name>
+  <name xml:lang="nap">Navigatore web Midori</name>
+  <name xml:lang="nb">Midori Nettleser</name>
+  <name xml:lang="nl">Midori webbrowser</name>
+  <name xml:lang="nn">Midori Nettlesar</name>
+  <name xml:lang="pl">Przeglądarka internetowa Midori</name>
+  <name xml:lang="pt">Navegador web Midori</name>
+  <name xml:lang="pt_BR">Navegador Web Midori</name>
+  <name xml:lang="ro">Navigatorul web Midori</name>
+  <name xml:lang="ru">Веб-браузер Midori</name>
+  <name xml:lang="sk">Midori internetový prehliadač</name>
+  <name xml:lang="sl">Brskalnik Midori</name>
+  <name xml:lang="sq">Midori - Shfletuesi i Internetit</name>
+  <name xml:lang="sr">Прегледник мреже Мидори</name>
+  <name xml:lang="sv">Webbläsaren Midori</name>
+  <name xml:lang="ta">மிடோரி இணைய உலாவி</name>
+  <name xml:lang="te">మిడొరి వెబ్ విహారిణి</name>
+  <name xml:lang="th">เว็บเบราว์เซอร์มิโดะริ</name>
+  <name xml:lang="tl">Midori Web Browser</name>
+  <name xml:lang="tr">Midori İnternet Tarayıcısı</name>
+  <name xml:lang="ug">مىدورى(Midori) توركۆرگۈ</name>
+  <name xml:lang="uk">Midori - переглядач Веб-сторінок</name>
+  <name xml:lang="ur">میڈوری ویب براؤزر</name>
+  <name xml:lang="vi">Trình duyệt web Midori</name>
+  <name xml:lang="zh_CN">Midori 网络浏览器</name>
+  <name xml:lang="zh_TW">Midori 網頁瀏覽器</name>
+  <categories>
+    <category>Network</category>
+    <category>WebBrowser</category>
+  </categories>
+  <kudos>
+    <kudo>AppMenu</kudo>
+    <kudo>HiDpiIcon</kudo>
+    <kudo>ModernToolkit</kudo>
+    <kudo>Notifications</kudo>
+    <kudo>UserDocs</kudo>
+  </kudos>
+  <summary>A fast and lightweight web browser</summary>
+  <description>
+    <p>
+    Midori is a lightweight yet powerful web browser which runs just as well on little embedded computers named for delicious pastries as it does on beefy machines with a core temperature exceeding that of planet earth. And it looks good doing that, too. Oh, and of course it's free software.
+    </p>
+    <p>Privacy out of the box</p>
+    <ul>
+      <li>Adblock filter list support</li>
+      <li>Private browsing</li>
+      <li>Manage cookies and scripts</li>
+    </ul>
+    <p>Productivity features</p>
+    <ul>
+      <li>Open a 1000 tabs instantly</li>
+      <li>Easy web apps creation</li>
+      <li>Customizable side panels</li>
+      <li>User scripts and styles a la Greasemonkey</li>
+      <li>Web developer tools powered by WebKit</li>
+      <li>Cross-browser extensions compatible with Chrome, Firefox, Opera and Vivaldi</li>
+    </ul>
+  </description>
+  <url type="homepage">https://www.midori-browser.org/</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://www.midori-browser.org/images/screenshots/rdio.png</image>
+    </screenshot>
+  </screenshots>
+  <update_contact>christian@twotoasts.de</update_contact>
+  <developer_name>Christian Dywan</developer_name>
+  <url type="bugtracker">https://github.com/midori-browser/core/issues</url>
+  <url type="faq">https://www.midori-browser.org/faq</url>
+  <url type="donation">https://www.midori-browser.org/donate</url>
+  <translation type="gettext">midori</translation>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="9.0" date="2019-07-27">
+      <description>
+        <ul>
+          <li>Use OpenGraph images for Speed Dial shortcuts</li>
+          <li>Better support for Javascript popups</li>
+          <li>(Re)store pinned tabs in the session</li>
+          <li>Re-introduce the Trust (certificate) button</li>
+          <li>Avoid key input recursion causing high CPU</li>
+          <li>Close Tab/ Other context menu items</li>
+          <li>Paste and Proceed option in the urlbar</li>
+          <li>Better urlbar suggestion escaping</li>
+          <li>Web extensions: Support for a sidebar action (experimental)</li>
+          <li>Merge app and page menu into one</li>
+          <li>Better focus handling of re-opened and background tabs</li>
+          <li>Show volume icon for tabs playing music</li>
+        </ul>
+      </description>
+    </release>
+    <release version="8.0" date="2019-02-28"/>
+    <release version="7.0" date="2018-11-30"/>
+    <release version="6.0" date="2018-10-31"/>
+    <release version="0.5.11" date="2015-08-30"/>
+  </releases>
+</component>

@@ -1,0 +1,127 @@
+<interface>
+  <object class="GtkPopover" id="popover">
+    <property name="modal">yes</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">8</property>
+        <property name="margin">8</property>
+        <property name="visible">yes</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">8</property>
+            <property name="margin">8</property>
+            <property name="visible">yes</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Cattura Pacchetti</property>
+                <property name="wrap">yes</property>
+                <property name="max-width-chars">33</property>
+                <property name="hexpand">yes</property>
+                <property name="visible">yes</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="switch1">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">8</property>
+            <property name="margin">8</property>
+            <property name="visible">yes</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Estrazione codice sorgente</property>
+                <property name="wrap">yes</property>
+                <property name="max-width-chars">33</property>
+                <property name="hexpand">yes</property>
+                <property name="visible">yes</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="switch2">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">8</property>
+            <property name="margin">8</property>
+            <property name="visible">yes</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Recording</property>
+                <property name="wrap">yes</property>
+                <property name="max-width-chars">33</property>
+                <property name="hexpand">yes</property>
+                <property name="visible">yes</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="switch3">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">8</property>
+            <property name="margin">8</property>
+            <property name="visible">yes</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Attiva tutto</property>
+                <property name="wrap">yes</property>
+                <property name="max-width-chars">33</property>
+                <property name="hexpand">yes</property>
+                <property name="visible">yes</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="switch4">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+
+  <template class="MidoriButton" parent="GtkButton">
+    <property name="focus-on-click">no</property>
+    <property name="action-name">win.open-config</property>
+    <property name="tooltip-text">Menù di configurazione</property>
+    <property name="visible">yes</property>
+    <child>
+      <object class="GtkImage">
+        <property name="icon-name">open-menu-symbolic</property>
+        <property name="use-fallback">yes</property>
+        <property name="visible">yes</property>
+      </object>
+    </child>
+  </template>
+</interface>
