@@ -1,7 +1,0 @@
-[Plugin]
-Module=new
-IAge=3
-Builtin=true
-Icon=open-menu-symbolic
-Name=Tesi Button
-Description=Open recording settings

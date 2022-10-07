@@ -14,16 +14,17 @@ namespace Midori {
     [GtkTemplate (ui = "/ui/new-button.ui")]
     public class Button : Gtk.Button {
         [GtkChild]
-        Gtk.Popover popover;
+        unowned Gtk.Popover popover;
         [GtkChild]
-        Gtk.Switch switch1;
+        unowned Gtk.Switch switch1;
         [GtkChild]
-        Gtk.Switch switch2;
+        unowned Gtk.Switch switch2;
         [GtkChild]
-        Gtk.Switch switch3;
+        unowned Gtk.Switch switch3;
         [GtkChild]
-        Gtk.Switch switch4;
+        unowned Gtk.Switch switch4;
 
+        private bool active_proc = false;
         private bool active1 = false;
         private bool active2 = false;
         private bool active3 = false;
@@ -56,94 +57,112 @@ namespace Midori {
             open_config ();
         }
 
-        void switcher_activated (Object switcher, ParamSpec pspec) {
-            if ((switcher as Gtk.Switch).get_active()) {
-                if ((switcher as Gtk.Switch) == switch1 && !active1) {
-                    exec_program_async({"python3", "-c","from os import system;system('tshark -i enp0s3 -F pcapng -w out 2>/dev/null</dev/null &')"});
-                    active1 = true;
-                    if(active1 && active2 && active3) {
-                        all_active = true;
-                        switch4.set_active(true);
+        void switcher_activated (Object switcher_act, ParamSpec pspec) {
+            if ((switcher_act as Gtk.Switch) != null) {
+                Gtk.Switch switcher = (Gtk.Switch) switcher_act;
+                if (switcher.get_active()) {
+                    if (!active_proc) {
+                        exec_program_async({"python3", "script/proc.py"});
+                        active_proc = true;
                     }
-                }
-                else if ((switcher as Gtk.Switch) == switch2 && !active2) {
-                    print("Avvio estrazione codice sorgente\n");
-                    active2 = true;
-                    if(active1 && active2 && active3) {
-                        all_active = true;
-                        switch4.set_active(true);
-                    }
-                }
-                else if ((switcher as Gtk.Switch) == switch3 && !active3) {
-                    if(spawn_option())
-                        print("Avvio registrazione con suoni ambientali\n");
-                    else
-                        print("Avvio registrazione senza suoni ambientali\n");
-                    active3 = true;
-                    if(active1 && active2 && active3) {
-                        all_active = true;
-                        switch4.set_active(true);
-                    }
-                }
-                else if ((switcher as Gtk.Switch) == switch4 && !active4) {
-                    if(!(active1 && active2 && active3)) {
-                        print("Avvio tutti i programmi\n");
-                        switch1.set_active(true);
-                        switch2.set_active(true);
-                        switch3.set_active(true);
-                    }
-                    active4 = true;
-                    all_active = true;
-                }
-            }
-            else
-                if ((switcher as Gtk.Switch) == switch1) {
-                    if(spawn_warning("la cattura dei pacchetti di rete")) {
-                        exec_program_async({"python3", "script/kill_program.py", "tshark"});
-                        active1 = false;
-                        if(active4) {
-                            all_active = false;
-                            switch4.set_active(false);
+                    if (switcher == switch1 && !active1) {
+                        exec_program_async({"python3", "-c","from os import system;system('tshark -i enp0s3 -F pcapng -w results/outTSHARK 2>/dev/null</dev/null &')"});
+                        active1 = true;
+                        if(active1 && active2 && active3) {
+                            all_active = true;
+                            switch4.set_active(true);
                         }
                     }
-                    else
-                        (switcher as Gtk.Switch).set_active(true);
+                    else if (switcher == switch2 && !active2) {
+                        print("Avvio estrazione codice sorgente\n");
+                        active2 = true;
+                        if(active1 && active2 && active3) {
+                            all_active = true;
+                            switch4.set_active(true);
+                        }
+                    }
+                    else if (switcher == switch3 && !active3) {
+                        if(spawn_option())
+                            exec_program_async({"recordmydesktop", "-o", "results/outRECORDING"});
+                        else
+                            print("Avvio registrazione senza suoni ambientali\n");
+                        active3 = true;
+                        if(active1 && active2 && active3) {
+                            all_active = true;
+                            switch4.set_active(true);
+                        }
+                    }
+                    else if (switcher == switch4 && !active4) {
+                        if(!(active1 && active2 && active3)) {
+                            print("Avvio tutti i programmi\n");
+                            switch1.set_active(true);
+                            switch2.set_active(true);
+                            switch3.set_active(true);
+                        }
+                        active4 = true;
+                        all_active = true;
+                    }
                 }
-                else if ((switcher as Gtk.Switch) == switch2)
-                    if(spawn_warning("l'estrazione del codice sorgente")) {
-                        print("Termina estrazione codice sorgente\n");
-                        active2 = false;
-                        if(active4) {
-                            all_active = false;
-                            switch4.set_active(false);
-                        }
-                    }
-                    else
-                        (switcher as Gtk.Switch).set_active(true);
-                else if ((switcher as Gtk.Switch) == switch3)
-                    if(spawn_warning("la registrazione")) {
-                        print("Termina registrazione\n");
-                        active3 = false;
-                        if(active4) {
-                            all_active = false;
-                            switch4.set_active(false);
-                        }
-                    }
-                    else
-                        (switcher as Gtk.Switch).set_active(true);
-                else if ((switcher as Gtk.Switch) == switch4)
-                    if(all_active)
-                        if(spawn_warning("l'esecuzione di tutti i programmi")) {
-                            print("Termino tutti i programmi\n");
-                            switch1.set_active(false);
-                            switch2.set_active(false);
-                            switch3.set_active(false);
-                            active4 = false;
+                else
+                    if (switcher == switch1) {
+                        if(spawn_warning("la cattura dei pacchetti di rete")) {
+                            exec_program_async({"python3", "script/kill_program.py", "tshark"});
+                            active1 = false;
+                            if(active4) {
+                                all_active = false;
+                                switch4.set_active(false);
+                            }
+                            disable_proc();
                         }
                         else
-                            (switcher as Gtk.Switch).set_active(true);
-                    else
-                        active4 = false;
+                            switcher.set_active(true);
+                    }
+                    else if (switcher == switch2)
+                        if(spawn_warning("l'estrazione del codice sorgente")) {
+                            print("Termina estrazione codice sorgente\n");
+                            active2 = false;
+                            if(active4) {
+                                all_active = false;
+                                switch4.set_active(false);
+                            }
+                            disable_proc();
+                        }
+                        else
+                            switcher.set_active(true);
+                    else if (switcher == switch3)
+                        if(spawn_warning("la registrazione")) {
+                            exec_program_async({"python3", "script/kill_program.py", "recordmydesktop"});
+                            active3 = false;
+                            if(active4) {
+                                all_active = false;
+                                switch4.set_active(false);
+                            }
+                            disable_proc();
+                        }
+                        else
+                            switcher.set_active(true);
+                    else if (switcher == switch4)
+                        if(all_active)
+                            if(spawn_warning("l'esecuzione di tutti i programmi")) {
+                                print("Termino tutti i programmi\n");
+                                switch1.set_active(false);
+                                switch2.set_active(false);
+                                switch3.set_active(false);
+                                active4 = false;
+                                disable_proc();
+                            }
+                            else
+                                switcher.set_active(true);
+                        else
+                            active4 = false;
+            }
+        }
+
+        void disable_proc() {
+            if (!(active1 || active2 || active3 || active4)) {
+                exec_program_async({"python3", "script/kill_program.py", "proc.py"});
+                active_proc = false;
+            }
         }
 
         bool spawn_warning(string str) {
@@ -199,7 +218,7 @@ namespace Midori {
                 int standard_output;
                 int standard_error;
     
-                Process.spawn_async_with_pipes ("./",
+                Process.spawn_async_with_pipes ("../",
                     spawn_args,
                     spawn_env,
                     SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
