@@ -27,7 +27,6 @@
     <file compressed="true">data/tabby/Update2.sql</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/about.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/bookmarks-button.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">ui/new-button.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/browser.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/clear-private-data.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/download-button.ui</file>
@@ -38,6 +37,7 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/suggestion-row.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/tab.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/tally.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/tesiMenu-button.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/urlbar.ui</file>
   </gresource>
 </gresources>

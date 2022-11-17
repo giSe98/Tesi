@@ -1,0 +1,7 @@
+[Plugin]
+Module=tesiMenu
+IAge=3
+Builtin=true
+Icon=open-menu-symbolic
+_Name=Tesi Menu Button
+_Description=Open menu button settings

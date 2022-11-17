@@ -10,13 +10,12 @@
 */
 
 Midori.Plugins? plugins;
+
 public void webkit_web_extension_initialize_with_user_data (WebKit.WebExtension extension, Variant user_data) {
     plugins = Midori.Plugins.get_default (user_data.get_string ());
     extension.page_created.connect ((page) => {
         page.document_loaded.connect (() => {
             try {
-                // cf. http://ogp.me
-                // Note: Some websites incorrectly use "name" instead of "property"
                 var image = page.get_dom_document ().query_selector ("meta[property=\"og:image\"],meta[name=\"og:image\"]");
                 var uri = image != null ? image.get_attribute ("content") : null;
                 if (uri == null) {

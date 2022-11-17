@@ -39,6 +39,9 @@ namespace Midori {
         [GtkChild]
         Gtk.Button confirm;
 
+        public signal void extract_signal(bool active);
+        private bool active = true;
+
         construct {
             notify["estimated-load-progress"].connect (update_progress);
             notify["is-loading"].connect (update_progress);
@@ -58,6 +61,11 @@ namespace Midori {
                 if (display_uri != uri) {
                     load_uri (display_uri);
                 }
+            });
+
+            extract_signal.connect((a) => {
+                stdout.printf("FUNZIONA to tab %s\n", a.to_string());
+                this.active = a;
             });
         }
 
@@ -106,6 +114,7 @@ namespace Midori {
             }
         }
 
+        
         async void load_uri_delayed (string? uri, string? title) {
             // Get title from history
             try {
@@ -121,7 +130,7 @@ namespace Midori {
                 debug ("Failed to lookup title in history: %s", error.message);
             }
         }
-
+        
         public override bool focus_in_event (Gdk.EventFocus event) {
             // Delayed load on focus
             if (display_uri != uri) {
@@ -129,12 +138,68 @@ namespace Midori {
             }
             return base.focus_in_event (event);
         }
+        
+        public void make_snap(string path) {
+            string page = uri.split("/")[2].replace("-", "_");
+            string date_string = new DateTime.now_local().format("%d_%m_%Y_%H:%M:%S");
+            string dir = path + page + "-" + date_string;
+            string command = "mkdir " + dir;
+            string filename = dir + "/" + page + ".html";
+            //stdout.printf("%s    %s\n", command, filename);
+            try {
+                Process.spawn_command_line_sync (command);
+                var file = File.new_for_path (filename);
+                
+                if (file.query_exists ()) {
+                    file.delete ();
+                }
+            
+                save_to_file.begin(file, MHTML, null, (obj, res) => {
+                    try {
+                        save_to_file.end(res);
+                    } catch (Error e) {
+                        stderr.printf ("%s\n", e.message);
+                    }
+                });
+
+                get_snapshot.begin(FULL_DOCUMENT, INCLUDE_SELECTION_HIGHLIGHTING, null, (obj, res) => {
+                    try {
+                        var ret1 = get_snapshot.end(res); 
+                        var image_name = dir + "/" + page + ".png";
+                        ret1.write_to_png(image_name);
+                    } catch (Error e) {
+                        stderr.printf ("%s\n", e.message);
+                    }
+                });
+ 
+                WebKit.CookieManager manager = get_context ().get_cookie_manager ();
+                manager.get_cookies.begin(uri, null, (obj, res) => {
+                    try {
+                        var cookies = manager.get_cookies.end(res);
+                        foreach (Soup.Cookie c in cookies)
+                            stdout.printf ("  %s: %s\n", c.name, c.value);
+                    } catch (Error e) {
+                        stderr.printf ("%s\n", e.message);
+                    }
+                });
+            } catch (Error e) {
+                stderr.printf ("%s\n", e.message);
+            }
+        }
 
         void update_progress (ParamSpec pspec) {
             // Update back/ forward state here since there's no signal
             can_go_back = base.can_go_back ();
             can_go_forward = base.can_go_forward ();
 
+            if (!is_loading && estimated_load_progress == 1.0){
+                if (active && uri != "https://www.google.it/" && !("&iflsig=" in uri)){
+                    //make_snap("../results/");
+                    stdout.printf("%s\n", get_website_data_manager ().get_base_cache_directory ());
+                    //stdout.printf("%s\n", tls.certificate_pem);
+                    GenericArray<unowned Bytes> dnss = tls.dns_names;
+                }
+            }
             if (is_loading && estimated_load_progress < 1.0) {
                 // When loading we want to see at minimum 10% progress
                 progress = estimated_load_progress.clamp (0.1, 1.0);

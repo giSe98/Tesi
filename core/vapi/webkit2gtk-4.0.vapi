@@ -123,6 +123,7 @@ namespace WebKit {
 		public void delete_cookies_for_domain (string domain);
 		public async WebKit.CookieAcceptPolicy get_accept_policy (GLib.Cancellable? cancellable) throws GLib.Error;
 		public async string[] get_domains_with_cookies (GLib.Cancellable? cancellable) throws GLib.Error;
+		public async GLib.List<Soup.Cookie> get_cookies (string uri, GLib.Cancellable? cancellable) throws GLib.Error;
 		public void set_accept_policy (WebKit.CookieAcceptPolicy policy);
 		public void set_persistent_storage (string filename, WebKit.CookiePersistentStorage storage);
 		public signal void changed ();

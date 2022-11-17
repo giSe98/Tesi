@@ -107,7 +107,7 @@ namespace Midori {
             set_boolean ("settings", "close-buttons-on-tabs", value, true);
         } }
 
-        string default_toolbar = "TabNew,Back,ReloadStop,Location,BookmarkAdd,CompactMenu, NewAdd";
+        string default_toolbar = "TabNew,Back,ReloadStop,Location,BookmarkAdd,CompactMenu";
         internal string toolbar_items { owned get {
             return get_string ("settings", "toolbar-items", default_toolbar);
         } set {

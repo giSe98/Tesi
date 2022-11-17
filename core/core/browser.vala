@@ -30,6 +30,8 @@ namespace Midori {
         Menu zoom_menu = new Menu ();
         internal double zoom_level { get; protected set; default = 1.0f; }
 
+        public signal void extract_signal_to_browser(bool active);
+
         const ActionEntry[] actions = {
             { "compactmenu", compactmenu_activated },
             { "navigationbar", navigationbar_activated },
@@ -84,6 +86,12 @@ namespace Midori {
         uint focus_timeout = 0;
 
         construct {
+            extract_signal_to_browser.connect((a) => {
+                stdout.printf("FUNZIONA to browser %s\n", a.to_string());
+                tab = (Tab) tabs.visible_child;
+                if (tab != null)
+                    tab.extract_signal(a);
+            });
             overlay.add_events (Gdk.EventMask.ENTER_NOTIFY_MASK | Gdk.EventMask.POINTER_MOTION_MASK);
             overlay.enter_notify_event.connect ((event) => {
                 if (is_fullscreen && !tab.pinned) {
@@ -271,7 +279,7 @@ namespace Midori {
             bind_property ("is-small", navigationbar.actionbox, "visible", BindingFlags.SYNC_CREATE | BindingFlags.INVERT_BOOLEAN);
             search.bind_property ("search-mode-enabled", search, "visible", BindingFlags.SYNC_CREATE);
             navigationbar.urlbar.notify["uri"].connect ((pspec) => {
-                string uri = navigationbar.urlbar.uri;
+                string uri = navigationbar.urlbar.uri; 
                 if (uri.has_prefix ("javascript:")) {
                     tab.run_javascript.begin (uri.substring (11, -1), null);
                 } else if (uri != tab.display_uri) {
@@ -489,11 +497,6 @@ namespace Midori {
             var tab = new Tab (null, web_context);
             add (tab);
             tabs.visible_child = tab;
-        }
-
-        public bool activated() {
-            print("FYUNZUASO\n");
-            return true;
         }
 
         void compactmenu_activated () {
