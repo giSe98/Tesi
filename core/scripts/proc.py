@@ -16,7 +16,7 @@ for row in processes[1:]:
     new_row = pd.DataFrame([splitted], columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
     df = pd.concat([df, new_row], ignore_index = True, axis = 0)
 
-df.to_csv("results/outPROC.csv", index=False, columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
+df.to_csv("/home/test/core/results/outPROC.csv", index=False, columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
 sleep(5)
 
 pids = df['PID'].tolist()
@@ -52,5 +52,5 @@ while True:
             index = df.index[df['PID'] == pid][0]
             df.loc[index, ['ENDED']] = strftime("%H:%M:%S", localtime(time() - 2.0))
     
-    df.to_csv("results/outPROC.csv", index=False, columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
+    df.to_csv("/home/test/core/results/outPROC.csv", index=False, columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
     sleep(2)

@@ -29,8 +29,10 @@ namespace Midori {
         internal bool is_small { get; protected set; default = false; }
         Menu zoom_menu = new Menu ();
         internal double zoom_level { get; protected set; default = 1.0f; }
-
+        
         public signal void extract_signal_to_browser(bool active);
+        private bool tesi_button = false;
+        public signal void tesi_active(bool active);
 
         const ActionEntry[] actions = {
             { "compactmenu", compactmenu_activated },
@@ -87,11 +89,16 @@ namespace Midori {
 
         construct {
             extract_signal_to_browser.connect((a) => {
-                stdout.printf("FUNZIONA to browser %s\n", a.to_string());
+                //stdout.printf("FUNZIONA to browser %s\n", a.to_string());
                 tab = (Tab) tabs.visible_child;
                 if (tab != null)
                     tab.extract_signal(a);
             });
+
+            tesi_active.connect((a) => {
+                this.tesi_button = a;
+            });
+
             overlay.add_events (Gdk.EventMask.ENTER_NOTIFY_MASK | Gdk.EventMask.POINTER_MOTION_MASK);
             overlay.enter_notify_event.connect ((event) => {
                 if (is_fullscreen && !tab.pinned) {
@@ -494,13 +501,16 @@ namespace Midori {
         }
 
         void tab_new_activated () {
-            var tab = new Tab (null, web_context);
-            add (tab);
-            tabs.visible_child = tab;
+            if (!tesi_button) {
+                var tab = new Tab (null, web_context);
+                add (tab);
+                tabs.visible_child = tab;
+            }
         }
 
         void compactmenu_activated () {
-            app_menu.popover.show ();
+            if (!tesi_button)
+                app_menu.popover.show ();
         }
 
         void navigationbar_activated () {
@@ -647,7 +657,7 @@ namespace Midori {
             try {
                 var info = AppInfo.get_default_for_type ("text/plain", false);
                 // No editor available? Show source in a tab
-                if (info == null) {
+                if (info == null && !tesi_button) {
                     var new_tab = new Tab (tab, web_context, uri, tab.display_title);
                     new_tab.load_plain_text (((string)(yield tab.get_main_resource ().get_data (null))));
                     new_tab.set_data<bool> ("foreground", true);
@@ -720,74 +730,76 @@ namespace Midori {
         }
 
         public new void add (Tab tab) {
-            tab.popover.relative_to = navigationbar.urlbar;
-            if (is_locked) {
-                tab.decide_policy.connect ((decision, type) => {
-                    switch (type) {
-                        case WebKit.PolicyDecisionType.NAVIGATION_ACTION:
-                            // No user-initiated new tabs
-                            decision.use ();
-                            return true;
-                        case WebKit.PolicyDecisionType.NEW_WINDOW_ACTION:
-                            // External links open in the default browser
-                            var action = ((WebKit.NavigationPolicyDecision)decision).navigation_action;
-                            string uri = action.get_request ().uri;
-                            try {
-                                Gtk.show_uri (get_screen (), uri, Gtk.get_current_event_time ());
-                            } catch (Error error) {
-                                critical ("Failed to open %s: %s", uri, error.message);
-                            }
-                            decision.ignore ();
-                            return true;
-                        default:
-                            return false;
-                    }
+            if (!tesi_button) {
+                tab.popover.relative_to = navigationbar.urlbar;
+                if (is_locked) {
+                    tab.decide_policy.connect ((decision, type) => {
+                        switch (type) {
+                            case WebKit.PolicyDecisionType.NAVIGATION_ACTION:
+                                // No user-initiated new tabs
+                                decision.use ();
+                                return true;
+                            case WebKit.PolicyDecisionType.NEW_WINDOW_ACTION:
+                                // External links open in the default browser
+                                var action = ((WebKit.NavigationPolicyDecision)decision).navigation_action;
+                                string uri = action.get_request ().uri;
+                                try {
+                                    Gtk.show_uri (get_screen (), uri, Gtk.get_current_event_time ());
+                                } catch (Error error) {
+                                    critical ("Failed to open %s: %s", uri, error.message);
+                                }
+                                decision.ignore ();
+                                return true;
+                            default:
+                                return false;
+                        }
+                    });
+                }
+                tab.create.connect ((action) => {
+                    var new_tab = new Tab (tab, web_context);
+                    new_tab.hide ();
+                    new_tab.ready_to_show.connect (() => {
+                        new_tab.show ();
+                        if (!new_tab.get_window_properties ().locationbar_visible) {
+                            new_tab.pinned = true;
+                            var browser = new Browser ((App)application, true);
+                            var geometry = new_tab.get_window_properties ().geometry;
+                            browser.default_width = geometry.width > 1 ? geometry.width : 640;
+                            browser.default_height = geometry.height > 1 ? geometry.height : 480;
+                            browser.transient_for = this;
+                            browser.add (new_tab);
+                            browser.show ();
+                            return;
+                        }
+                        new_tab.set_data<bool> ("foreground", true);
+                        add (new_tab);
+                    });
+                    new_tab.load_request (action.get_request ());
+                    return new_tab;
                 });
-            }
-            tab.create.connect ((action) => {
-                var new_tab = new Tab (tab, web_context);
-                new_tab.hide ();
-                new_tab.ready_to_show.connect (() => {
-                    new_tab.show ();
-                    if (!new_tab.get_window_properties ().locationbar_visible) {
-                        new_tab.pinned = true;
-                        var browser = new Browser ((App)application, true);
-                        var geometry = new_tab.get_window_properties ().geometry;
-                        browser.default_width = geometry.width > 1 ? geometry.width : 640;
-                        browser.default_height = geometry.height > 1 ? geometry.height : 480;
-                        browser.transient_for = this;
-                        browser.add (new_tab);
-                        browser.show ();
+                tab.enter_fullscreen.connect (() => {
+                    navigationbar.hide ();
+                    return false;
+                });
+                tab.leave_fullscreen.connect (() => {
+                    navigationbar.visible = !tab.pinned;
+                    return false;
+                });
+                tab.close.connect (() => {
+                    // Don't add internal or blank pages to trash
+                    if (tab.item.uri.has_prefix ("internal:") || tab.item.uri.has_prefix ("about:")) {
                         return;
                     }
-                    new_tab.set_data<bool> ("foreground", true);
-                    add (new_tab);
+                    trash.append (tab.item);
                 });
-                new_tab.load_request (action.get_request ());
-                return new_tab;
-            });
-            tab.enter_fullscreen.connect (() => {
-                navigationbar.hide ();
-                return false;
-            });
-            tab.leave_fullscreen.connect (() => {
-                navigationbar.visible = !tab.pinned;
-                return false;
-            });
-            tab.close.connect (() => {
-                // Don't add internal or blank pages to trash
-                if (tab.item.uri.has_prefix ("internal:") || tab.item.uri.has_prefix ("about:")) {
-                    return;
+                // Support Gtk.StackSwitcher
+                tab.notify["display-title"].connect ((pspec) => {
+                    tabs.child_set (tab, "title", tab.display_title);
+                });
+                tabs.add_titled (tab, tab.id, tab.display_title);
+                if (tab.get_data<bool> ("foreground")) {
+                    tabs.visible_child = tab;
                 }
-                trash.append (tab.item);
-            });
-            // Support Gtk.StackSwitcher
-            tab.notify["display-title"].connect ((pspec) => {
-                tabs.child_set (tab, "title", tab.display_title);
-            });
-            tabs.add_titled (tab, tab.id, tab.display_title);
-            if (tab.get_data<bool> ("foreground")) {
-                tabs.visible_child = tab;
             }
         }
 

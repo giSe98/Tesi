@@ -18,12 +18,12 @@ namespace Tesi {
         private bool active4 = false;
         private bool all_active = false;
         private bool active_proc = false;
+        private string date_string = "";
         
         Midori.Browser browser;
 
         construct {
             popover.relative_to = this;
-            //handler = new Midori.Handler();
             switch1.notify["active"].connect(switcher_activated);
             switch2.notify["active"].connect(switcher_activated);
             switch3.notify["active"].connect(switcher_activated);
@@ -33,7 +33,7 @@ namespace Tesi {
         public virtual signal void open_config () {
             popover.show ();
         }
-
+        
         public TesiMenuButton (Midori.Browser browser) {
             this.browser = browser;
             
@@ -47,6 +47,8 @@ namespace Tesi {
         }
 
         void switcher_activated (Object switcher_act, ParamSpec pspec) {
+            if (date_string == "") 
+                date_string = new DateTime.now_local().format("%d-%m-%Y_%H:%M:%S");
             if ((switcher_act as Gtk.Switch) != null) {
                 Gtk.Switch switcher = (Gtk.Switch) switcher_act;
                 if (switcher.get_active()) {
@@ -55,7 +57,7 @@ namespace Tesi {
                         active_proc = true;
                     }
                     if (switcher == switch1 && !active1) {
-                        exec_program_async({"python3", "-c","from os import system;system('tshark -i enp0s3 -F pcapng -w results/outTSHARK 2>/dev/null</dev/null &')"});
+                        exec_program_async({"python3", "-c","from os import system;system('tshark -i enp0s3 -F pcapng -w $HOME/core/results/outTSHARK 2>/dev/null</dev/null &')"});
                         active1 = true;
                         if(active1 && active2 && active3) {
                             all_active = true;
@@ -73,9 +75,9 @@ namespace Tesi {
                     }
                     else if (switcher == switch3 && !active3) {
                         if(spawn_option())
-                            exec_program_async({"obs", "--collection \"full\"", "--startrecording", "--minimize-to-tray"});
+                            exec_program_async({"obs", "--profile \"/home/test/core/obs_config/base/\"", "--collection \"full\"", "--startrecording", "--minimize-to-tray"});
                         else
-                            exec_program_async({"obs", "--collection \"no_mic\"", "--startrecording", "--minimize-to-tray"});
+                            exec_program_async({"obs", "--profile \"/home/test/core/obs_config/base/\"", "--collection \"no_mic\"", "--startrecording", "--minimize-to-tray"});
                         active3 = true;
                         if(active1 && active2 && active3) {
                             all_active = true;
@@ -96,13 +98,14 @@ namespace Tesi {
                 else
                     if (switcher == switch1) {
                         if(spawn_warning("la cattura dei pacchetti di rete")) {
-                            exec_program_async({"python3", "scripts/kill_program.py", "tshark"});
+                            exec_program_sync("../scripts/kill.sh \"[t]shark\"");
                             active1 = false;
                             if(active4) {
                                 all_active = false;
                                 switch4.set_active(false);
                             }
                             disable_proc();
+                            check_active();
                         }
                         else
                             switcher.set_active(true);
@@ -117,18 +120,20 @@ namespace Tesi {
                                 switch4.set_active(false);
                             }
                             disable_proc();
+                            check_active();
                         }
                         else
                             switcher.set_active(true);
                     else if (switcher == switch3)
                         if(spawn_warning("la registrazione")) {
-                            exec_program_async({"python3", "scripts/kill_program.py", "obs --collection"});
+                            exec_program_sync("../scripts/kill.sh \"[o]bs --profile\"");
                             active3 = false;
                             if(active4) {
                                 all_active = false;
                                 switch4.set_active(false);
                             }
                             disable_proc();
+                            check_active();
                         }
                         else
                             switcher.set_active(true);
@@ -141,6 +146,7 @@ namespace Tesi {
                                 switch3.set_active(false);
                                 active4 = false;
                                 disable_proc();
+                                check_active();
                             }
                             else
                                 switcher.set_active(true);
@@ -149,9 +155,21 @@ namespace Tesi {
             }
         }
 
+        void check_active() {
+            if (!(active1 || active2 || active3 || active4)){
+                string path = "/home/test";
+                if (spawn_option_chooser()) {
+                    string resp = spawn_chooser();
+                    if (resp != null)
+                        path = resp;
+                    } 
+                make_zip(path);
+            }
+        }
+
         void disable_proc() {
             if (!(active1 || active2 || active3 || active4)) {
-                exec_program_async({"python3", "scripts/kill_program.py", "proc.py"});
+                exec_program_sync("../scripts/kill.sh \"[p]roc.py\"");
                 active_proc = false;
             }
         }
@@ -223,10 +241,71 @@ namespace Tesi {
             }
         }
 
-        /*bool get_active() {
-            return active2;
-        }*/
+        void exec_program_sync(string command) {
+            try {
+                Process.spawn_command_line_sync (command);
+            } catch (SpawnError e) {
+                print ("Error: %s\n", e.message);
+            }
+        }
 
+        bool spawn_option_chooser() {
+            var message = "Vuoi salvare i risultati in una cartella differente da quella di default (/home/test) ?";
+            var dialog = new Gtk.MessageDialog(browser,Gtk.DialogFlags.MODAL,Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO, message);
+            dialog.set_title("INFO");
+            int response = dialog.run();
+            bool ret = false;
+
+            switch (response) {
+                case Gtk.ResponseType.YES:
+                    ret = true;
+                    break;
+                case Gtk.ResponseType.NO:
+                    break;
+                case Gtk.ResponseType.DELETE_EVENT:
+                    print ("dialog closed or cancelled\n");
+                    break;
+            }
+
+            dialog.destroy();
+            return ret;
+        }
+
+        string spawn_chooser() {
+            var chooser = new Gtk.FileChooserDialog(
+                "Seleziona la cartella dove vuoi salvare i risultati", 
+                browser, 
+                Gtk.FileChooserAction.SELECT_FOLDER,
+                "_Annulla",
+                Gtk.ResponseType.CANCEL,
+                "_Seleziona",
+                Gtk.ResponseType.ACCEPT);
+
+            chooser.set_select_multiple (false);
+            int response = chooser.run ();
+            string ret = null;
+
+            switch (response) {
+                case Gtk.ResponseType.ACCEPT:
+                    ret = chooser.get_filename ();
+                    break;
+                case Gtk.ResponseType.CANCEL:
+                    break;
+                case Gtk.ResponseType.DELETE_EVENT:
+                    print ("dialog closed or cancelled\n");
+                    break;
+            }
+
+            chooser.destroy ();
+            return ret;
+        }
+
+        void make_zip(string path) {
+            string zip_name = "../to_sign/results_" + date_string + ".zip";
+            exec_program_sync("7z a -tzip " + zip_name + " ../results/*");
+            exec_program_sync("zipsign sign -f " + zip_name + " -p ../to_sign/priv.key -c ../to_sign/csr.crt");
+            exec_program_sync("mv " + zip_name + " " + path);
+        }
     }
 
     public class Frontend : Object, Midori.BrowserActivatable {

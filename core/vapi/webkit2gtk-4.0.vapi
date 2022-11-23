@@ -921,6 +921,7 @@ namespace WebKit {
 		public unowned string? get_base_data_directory ();
 		public unowned WebKit.CookieManager get_cookie_manager ();
 		public unowned string? get_disk_cache_directory ();
+		public unowned string? get_dom_cache_directory ();
 		public unowned string? get_indexeddb_directory ();
 		public unowned string? get_local_storage_directory ();
 		public unowned string? get_offline_application_cache_directory ();
@@ -929,6 +930,7 @@ namespace WebKit {
 		public string base_cache_directory { get; construct; }
 		public string base_data_directory { get; construct; }
 		public string disk_cache_directory { get; construct; }
+		public string dom_cache_directory { get; construct; }
 		public string indexeddb_directory { get; construct; }
 		[NoAccessorMethod]
 		public bool is_ephemeral { get; construct; }

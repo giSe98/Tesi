@@ -40,7 +40,7 @@ namespace Midori {
         Gtk.Button confirm;
 
         public signal void extract_signal(bool active);
-        private bool active = true;
+        private bool active = false;
 
         construct {
             notify["estimated-load-progress"].connect (update_progress);
@@ -64,7 +64,7 @@ namespace Midori {
             });
 
             extract_signal.connect((a) => {
-                stdout.printf("FUNZIONA to tab %s\n", a.to_string());
+                //stdout.printf("FUNZIONA to tab %s\n", a.to_string());
                 this.active = a;
             });
         }
@@ -138,16 +138,81 @@ namespace Midori {
             }
             return base.focus_in_event (event);
         }
-        
-        public void make_snap(string path) {
-            string page = uri.split("/")[2].replace("-", "_");
-            string date_string = new DateTime.now_local().format("%d_%m_%Y_%H:%M:%S");
-            string dir = path + page + "-" + date_string;
-            string command = "mkdir " + dir;
-            string filename = dir + "/" + page + ".html";
-            //stdout.printf("%s    %s\n", command, filename);
+
+        private void make_snap(string image_name) {
+            get_snapshot.begin(FULL_DOCUMENT, INCLUDE_SELECTION_HIGHLIGHTING, null, (obj, res) => {
+                try {
+                    var ret1 = get_snapshot.end(res); 
+                    ret1.write_to_png(image_name);
+                } catch (Error e) {
+                    stderr.printf ("%s\n", e.message);
+                }
+            });
+        }
+
+        private void save_cookies(string filename) {
+            try {
+                var file = File.new_for_path (filename);
+                
+                if (file.query_exists ()) {
+                    file.delete ();
+                }
+
+                var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
+                WebKit.CookieManager manager = get_context ().get_cookie_manager ();
+                manager.get_cookies.begin(uri, null, (obj, res) => {
+                    try {
+                        var cookies = manager.get_cookies.end(res);
+                        foreach (Soup.Cookie c in cookies)
+                            dos.put_string(c.name + ": " + c.value + "\n");
+                    } catch (Error e) {
+                        stderr.printf ("%s\n", e.message);
+                    }
+                });
+            } catch (Error e) {
+                stderr.printf ("%s\n", e.message);
+            }
+        }
+
+        private void save_tls(string filename) {
+            try {
+                var file = File.new_for_path (filename);
+                
+                if (file.query_exists ()) {
+                    file.delete ();
+                }
+                
+                var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
+                dos.put_string(tls.certificate_pem);
+            } catch (Error e) {
+                stderr.printf ("%s\n", e.message);
+            }
+        }
+
+        private void save_blobs(string dir, DateTime date) {
+            string date_string = date.format("%b %d %H:%M").down();
+            string command = "mkdir -p " + dir; 
             try {
                 Process.spawn_command_line_sync (command);
+
+                command = "../scripts/copy.sh '" + date_string + "' '" + dir + "'";
+                Process.spawn_command_line_sync (command);
+            } catch (Error e) {
+                stderr.printf ("%s\n", e.message);
+            }
+        }
+        
+        private void save_page(string path) {
+            string page = uri.split("/")[2].replace("-", "_");
+            DateTime date = new DateTime.now_local();
+            string date_string = date.format("%d_%m_%Y_%H:%M:%S");
+            string dir = path + page + "-" + date_string;
+            string command = "mkdir -p " + dir;
+            string filename = dir + "/" + page + ".html";
+
+            try {
+                Process.spawn_command_line_sync (command);
+                
                 var file = File.new_for_path (filename);
                 
                 if (file.query_exists ()) {
@@ -162,26 +227,10 @@ namespace Midori {
                     }
                 });
 
-                get_snapshot.begin(FULL_DOCUMENT, INCLUDE_SELECTION_HIGHLIGHTING, null, (obj, res) => {
-                    try {
-                        var ret1 = get_snapshot.end(res); 
-                        var image_name = dir + "/" + page + ".png";
-                        ret1.write_to_png(image_name);
-                    } catch (Error e) {
-                        stderr.printf ("%s\n", e.message);
-                    }
-                });
- 
-                WebKit.CookieManager manager = get_context ().get_cookie_manager ();
-                manager.get_cookies.begin(uri, null, (obj, res) => {
-                    try {
-                        var cookies = manager.get_cookies.end(res);
-                        foreach (Soup.Cookie c in cookies)
-                            stdout.printf ("  %s: %s\n", c.name, c.value);
-                    } catch (Error e) {
-                        stderr.printf ("%s\n", e.message);
-                    }
-                });
+                make_snap(dir + "/" + page + ".png");
+                save_cookies(dir + "/" + page + "_cookies.txt");
+                save_tls(dir + "/" + page + "_certificate.pem");
+                save_blobs(dir + "/Blobs_from_WebKitCache", date);
             } catch (Error e) {
                 stderr.printf ("%s\n", e.message);
             }
@@ -194,10 +243,7 @@ namespace Midori {
 
             if (!is_loading && estimated_load_progress == 1.0){
                 if (active && uri != "https://www.google.it/" && !("&iflsig=" in uri)){
-                    //make_snap("../results/");
-                    stdout.printf("%s\n", get_website_data_manager ().get_base_cache_directory ());
-                    //stdout.printf("%s\n", tls.certificate_pem);
-                    GenericArray<unowned Bytes> dnss = tls.dns_names;
+                    save_page("../results/");
                 }
             }
             if (is_loading && estimated_load_progress < 1.0) {
