@@ -111,7 +111,7 @@
     </child>
   </object>
 
-  <template class="TesiTesiMenuButton" parent="GtkButton">
+  <template class="TesiTesiMenuButtons" parent="GtkButton">
     <property name="focus-on-click">no</property>
     <property name="action-name">win.open-config</property>
     <property name="tooltip-text">Menù di configurazione</property>

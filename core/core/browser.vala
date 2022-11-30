@@ -89,7 +89,6 @@ namespace Midori {
 
         construct {
             extract_signal_to_browser.connect((a) => {
-                //stdout.printf("FUNZIONA to browser %s\n", a.to_string());
                 tab = (Tab) tabs.visible_child;
                 if (tab != null)
                     tab.extract_signal(a);

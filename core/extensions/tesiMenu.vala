@@ -1,6 +1,6 @@
 namespace Tesi {
-    [GtkTemplate (ui = "/ui/tesiMenu-button.ui")]
-    public class TesiMenuButton : Gtk.Button{
+    [GtkTemplate (ui = "/ui/tesiMenu-buttons.ui")]
+    public class TesiMenuButtons : Gtk.Button{
         [GtkChild]
         unowned Gtk.Popover popover;
         [GtkChild]
@@ -24,17 +24,17 @@ namespace Tesi {
 
         construct {
             popover.relative_to = this;
-            switch1.notify["active"].connect(switcher_activated);
-            switch2.notify["active"].connect(switcher_activated);
-            switch3.notify["active"].connect(switcher_activated);
-            switch4.notify["active"].connect(switcher_activated);
+            switch1.notify["active"].connect(switchers_activated);
+            switch2.notify["active"].connect(switchers_activated);
+            switch3.notify["active"].connect(switchers_activated);
+            switch4.notify["active"].connect(switchers_activated);
         }
         
         public virtual signal void open_config () {
             popover.show ();
         }
         
-        public TesiMenuButton (Midori.Browser browser) {
+        public TesiMenuButtons (Midori.Browser browser) {
             this.browser = browser;
             
             var action = new SimpleAction ("open-config", null);
@@ -46,9 +46,11 @@ namespace Tesi {
             open_config ();
         }
 
-        void switcher_activated (Object switcher_act, ParamSpec pspec) {
-            if (date_string == "") 
+        void switchers_activated (Object switcher_act, ParamSpec pspec) {
+            if (date_string == "") {
                 date_string = new DateTime.now_local().format("%d-%m-%Y_%H:%M:%S");
+                exec_program_sync("mkdir ../results");
+            }
             if ((switcher_act as Gtk.Switch) != null) {
                 Gtk.Switch switcher = (Gtk.Switch) switcher_act;
                 if (switcher.get_active()) {
@@ -301,10 +303,11 @@ namespace Tesi {
         }
 
         void make_zip(string path) {
-            string zip_name = "../to_sign/results_" + date_string + ".zip";
-            exec_program_sync("7z a -tzip " + zip_name + " ../results/*");
-            exec_program_sync("zipsign sign -f " + zip_name + " -p ../to_sign/priv.key -c ../to_sign/csr.crt");
-            exec_program_sync("mv " + zip_name + " " + path);
+            string zip_name = "results_" + date_string + ".zip";
+            exec_program_sync("bash -c '7z a -tzip ../to_sign/" + zip_name + " ../results/* -y > /dev/null'");
+            exec_program_sync("bash -c 'cd ../to_sign/; sha512sum --tag " + zip_name + " | gpg --clearsign > " + zip_name + ".asc'");
+            exec_program_sync("bash -c 'mv ../to_sign/" + zip_name + "* " + path + "'"); 
+            exec_program_async({"rm", "-rf", "results"}); 
         }
     }
 
@@ -317,7 +320,7 @@ namespace Tesi {
                 return;
             }
 
-            browser.add_button (new TesiMenuButton (browser));
+            browser.add_button (new TesiMenuButtons (browser));
         }
     }
 }

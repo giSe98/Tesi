@@ -3,25 +3,10 @@ from subprocess import Popen, PIPE
 from time import sleep, time, strftime, localtime
 
 df = pd.DataFrame([], columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
-
-processes = Popen(['ps', 'aux'], stdout=PIPE).communicate()[0].decode().strip().split('\n')
-nfields = len(processes[0].split()) - 1
-
-for row in processes[1:]:
-    splitted = row.split(None, nfields)
-    if len(splitted) < 11:
-        splitted.append("")
-    splitted[1] = int(splitted[1])
-    splitted.insert(10, "")
-    new_row = pd.DataFrame([splitted], columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
-    df = pd.concat([df, new_row], ignore_index = True, axis = 0)
-
-df.to_csv("/home/test/core/results/outPROC.csv", index=False, columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
-sleep(5)
-
-pids = df['PID'].tolist()
+pids = []
 while True:
-    processes = Popen(['ps', 'aux'], stdout=PIPE).communicate()[0].decode().strip().split('\n')
+    processes = Popen("ps aux | grep -wv 'ps aux'", shell=True, stdout=PIPE).communicate()[0].decode().strip().split('\n')
+    nfields = len(processes[0].split()) - 1
     new_proc = {}
     for row in processes[1:]:
         splitted = row.split(None, nfields)
@@ -52,5 +37,5 @@ while True:
             index = df.index[df['PID'] == pid][0]
             df.loc[index, ['ENDED']] = strftime("%H:%M:%S", localtime(time() - 2.0))
     
-    df.to_csv("/home/test/core/results/outPROC.csv", index=False, columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'])
+    df.to_csv("/home/test/core/results/outPROC.csv", index=False, columns=['USER', 'PID', '%CPU', '%MEM', 'VSZ', 'RSS', 'TTY', 'STAT', 'START', 'TIME', 'ENDED', 'COMMAND'], sep = ';')
     sleep(2)

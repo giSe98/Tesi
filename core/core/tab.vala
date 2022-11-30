@@ -64,7 +64,6 @@ namespace Midori {
             });
 
             extract_signal.connect((a) => {
-                //stdout.printf("FUNZIONA to tab %s\n", a.to_string());
                 this.active = a;
             });
         }
@@ -201,11 +200,31 @@ namespace Midori {
                 stderr.printf ("%s\n", e.message);
             }
         }
+
+        private void save_whois(string filename, string page_name) {
+            var command = "whois " + page_name;
+            string cmd_stdout;
+            try {
+                Process.spawn_command_line_sync (command, out cmd_stdout);
+
+                var file = File.new_for_path (filename);
+                
+                if (file.query_exists ()) {
+                    file.delete ();
+                }
+                var dos = new DataOutputStream (file.create (FileCreateFlags.REPLACE_DESTINATION));
+                dos.put_string(cmd_stdout);
+                
+            } catch (Error e) {
+                stderr.printf ("%s\n", e.message);
+            }
+        }
         
         private void save_page(string path) {
-            string page = uri.split("/")[2].replace("-", "_");
+            string page_name = uri.split("/")[2];
+            string page = page_name.replace("-", "_");
             DateTime date = new DateTime.now_local();
-            string date_string = date.format("%d_%m_%Y_%H:%M:%S");
+            string date_string = date.format("%d_%m_%Y_%H_%M_%S");
             string dir = path + page + "-" + date_string;
             string command = "mkdir -p " + dir;
             string filename = dir + "/" + page + ".html";
@@ -227,6 +246,7 @@ namespace Midori {
                     }
                 });
 
+                save_whois(dir + "/whois_" + page + ".txt", page_name);
                 make_snap(dir + "/" + page + ".png");
                 save_cookies(dir + "/" + page + "_cookies.txt");
                 save_tls(dir + "/" + page + "_certificate.pem");

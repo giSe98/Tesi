@@ -37,7 +37,7 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/suggestion-row.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/tab.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/tally.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">ui/tesiMenu-button.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/tesiMenu-buttons.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/urlbar.ui</file>
   </gresource>
 </gresources>
